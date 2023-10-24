@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { nanoid } from "nanoid";
 
 import { ContactForm } from "./ContactForm";
@@ -6,22 +5,19 @@ import { ContactList } from './ContactList';
 import { Filter } from "./Filter";
 
 import { Container, SectionStyled } from "./App.styled";
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilter, addContact, deleteContact } from 'redux/contactListReducer';
 
 
 export function App() {
-  const [contacts, setContacts] = useState(() => {
-    const storedContacts = JSON.parse(window.localStorage.getItem('contacts'));
-    return storedContacts ?? []
-  });
-  const [filter, setFilter] = useState('');
+
+  const dispatch = useDispatch();
+  const contacts = useSelector((state) => state.contactList.contacts);
+  const filter = useSelector((state) => state.contactList.filter)
 
   const handleFilterChange = (e) => {
-    setFilter(e.target.value)
+    dispatch(setFilter(e.target.value))
   }
-
-  useEffect(() => {
-    window.localStorage.setItem('contacts', JSON.stringify(contacts))
-  }, [contacts])
 
   const checkContactByName = cName => {
     const array = contacts;
@@ -32,14 +28,12 @@ export function App() {
     }
     return false
   }
-  const addContact = (name, number) => {
+  const addNewContact = (name, number) => {
     if (checkContactByName(name)) {
       return
     }
-    const id = nanoid(3);
-    setContacts(prevContacts => (
-      [...prevContacts, { id, name, number }]
-    ))
+    const id = nanoid(4);
+    dispatch(addContact({ id, name, number }))
   }
 
   const filterContactsByName = () => {
@@ -47,8 +41,8 @@ export function App() {
     return contacts.filter(contact => contact.name.toLowerCase().includes(ff))
   }
 
-  const deleteContact = id => {
-    setContacts(prevContacts => ((prevContacts.filter(contact => contact.id !== id))))
+  const deleteContactById = id => {
+    dispatch(deleteContact(id))
   }
 
 
@@ -58,7 +52,7 @@ export function App() {
       <Container>
         <h2>Add new contact</h2>
         <ContactForm
-          onAddContact={addContact} />
+          onAddContact={addNewContact} />
       </Container>
 
       <Container>
@@ -69,7 +63,7 @@ export function App() {
         />
         <ContactList
           list={filterContactsByName()}
-          onDeleteContact={deleteContact}
+          onDeleteContact={deleteContactById}
         />
       </Container>
     </SectionStyled>
