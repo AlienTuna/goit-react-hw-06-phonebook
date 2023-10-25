@@ -1,12 +1,33 @@
 import { useState } from 'react';
-import PropTypes from "prop-types";
 
 import { FormStyled, InputStyled, BtnStyled } from "./ContactForm.styled";
+import { addContact } from 'redux/contactListReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 export function ContactForm({ onAddContact }) {
     const [name, setName] = useState('');
     const [number, setNumber] = useState('');
+
+    const contacts = useSelector((state) => state.contactList.contacts);
+    const dispatch = useDispatch();
+
+    const checkContactByName = cName => {
+        const array = contacts;
+        console.info('!!!!!!!', contacts)
+        const result = array.find(({ name }) => cName.toLowerCase() === name.toLowerCase())
+        if (result) {
+            alert(`${cName} is already in contacts`)
+            return true
+        }
+        return false
+    }
+    const addNewContact = (name, number) => {
+        if (checkContactByName(name)) {
+            return
+        }
+        dispatch(addContact({ name, number }))
+    }
 
     const saveFormState = e => {
         const { name, value } = e.target;
@@ -27,7 +48,7 @@ export function ContactForm({ onAddContact }) {
         e.preventDefault();
         const nameV = e.currentTarget.name.value;
         const numV = e.currentTarget.number.value;
-        onAddContact(nameV, numV);
+        addNewContact(nameV, numV);
         clearForm();
     }
 
@@ -60,9 +81,4 @@ export function ContactForm({ onAddContact }) {
             <BtnStyled type="submit">save</BtnStyled>
         </FormStyled>
     )
-}
-
-
-ContactForm.propTypes = {
-    onAddContact: PropTypes.func.isRequired
 }

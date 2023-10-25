@@ -1,9 +1,19 @@
+import { useSelector } from "react-redux";
 import { ContactListItem } from "../ContactList/ContactListItem";
 import { EmptyTxt } from "./ContactList.styled";
 
-import PropTypes, { arrayOf } from "prop-types";
+export function ContactList() {
 
-export function ContactList({ list, onDeleteContact }) {
+    const contacts = useSelector((state) => state.contactList.contacts);
+    const filter = useSelector((state) => state.contactList.filter)
+
+    const filterContactsByName = () => {
+        const ff = filter.toLowerCase() ?? '';
+        return contacts.filter(contact => contact.name.toLowerCase().includes(ff))
+    }
+
+    const list = filterContactsByName();
+
     return (
         <ul>
             {list.length
@@ -13,21 +23,10 @@ export function ContactList({ list, onDeleteContact }) {
                         id={id}
                         name={name}
                         number={number}
-                        onDeleteContact={onDeleteContact}
                     />
                 ))
                 : (<EmptyTxt>Contact list is empty</EmptyTxt>)
             }
         </ul>
     )
-}
-
-ContactList.propTypes = {
-    list: arrayOf(
-        PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            number: PropTypes.string.isRequired
-        })),
-    onDeleteContact: PropTypes.func.isRequired
 }
